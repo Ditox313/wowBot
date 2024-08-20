@@ -12,7 +12,7 @@ module.exports = {
     tabl: 'Табличка',
     banner: 'Баннер',
     stella: 'Стелла',
-    uknow: 'Неизвестно',
+    vizitki: 'Визитки',
     list: 'Листовки',
     art: 'Арт-объект',
    },
