@@ -1,0 +1,18 @@
+{
+  "name": "wowbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/index.js",
+    "dev": "nodemon ./src/index.js"
+  },
+  "author": "Xsodex",
+  "license": "ISC",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
