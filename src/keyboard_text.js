@@ -11,7 +11,7 @@ module.exports = {
     [
       [kb.buy.viveska_fasad, kb.buy.viveska_interier, kb.buy.viveska_neon],
       [kb.buy.tabl, kb.buy.banner, kb.buy.stella],
-      [kb.buy.uknow, kb.buy.list, kb.buy.art],
+      [kb.buy.vizitki, kb.buy.list, kb.buy.art],
       [kb.back]
     ]
    ]
