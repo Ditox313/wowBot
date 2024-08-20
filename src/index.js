@@ -4,6 +4,8 @@ const config = require('./config');
 const helper = require('./helper');
 const kb = require('./keyboard_buttons');
 const kb_text = require('./keyboard_text.js');
+// const User = mongoose.model('users')
+const User = require('./models/User.js');
 
 
 
@@ -34,9 +36,24 @@ helper.logStart()
 // Обработка команды /start
 bot.onText(/\/start/, (msg) => {
     const firstName = msg.from.first_name;
+   
+    // Сохраняем пользователя
+    const user = {
+        tgId : msg.from.id,
+        is_bot : msg.from.is_bot,
+        first_name : msg.from.first_name,
+        username : msg.from.username,
+        language_code : msg.from.language_code,
+    }
 
-    console.log(msg.from);
-    
+     try {
+        new User(user).save();
+        console.log('User saved:', user);
+    } catch (error) {
+        console.error('Error saving user:', error);
+    }
+
+
 
     // Отправка приветственного сообщения
     bot.sendMessage(helper.getChatId(msg), `Привет, ${firstName}! Добро пожаловать в наш бот. Выберите услугу которая вас интересует`,{
