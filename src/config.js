@@ -1,3 +1,4 @@
 module.exports = {
-    TOKEN: 'REDACTED'
+    TOKEN: 'REDACTED',
+    DB_URL: 'mongodb://localhost/wowbot',
 }
