@@ -23,7 +23,7 @@ helper.logStart();
 const states = {};
 
 // Обработка команды /start
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start/, async (msg) => {
     const firstName = msg.from.first_name;
 
     // Сохраняем пользователя
@@ -36,8 +36,14 @@ bot.onText(/\/start/, (msg) => {
     };
 
     try {
-        new User(user).save();
-        console.log('User saved:', user);
+        // Проверяем, существует ли пользователь с таким tgId
+        const existingUser = await User.findOne({ tgId: user.tgId });
+        if (!existingUser) {
+            await new User(user).save();
+            console.log('User saved:', user);
+        } else {
+            console.log('User already exists:', existingUser);
+        }
     } catch (error) {
         console.error('Error saving user:', error);
     }
@@ -188,6 +194,9 @@ function handleAskSize(msg) {
         });
         states[chatId].state = 'collect_data';
         states[chatId].nextQuestion = 'forward_to_operator';
+    } else if (msg.text.toLowerCase() === 'нет' || msg.text.toLowerCase() === 'не знаю') {
+        states[chatId].size = 'Нет';
+        forwardToOperator(chatId, msg.from);
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас макет?`, {
             reply_markup: {
@@ -245,7 +254,7 @@ function forwardToOperator(chatId, user) {
             caption: 'Макет'
         });
     }
-    if (states[chatId].size) {
+    if (states[chatId].size !== undefined) {
         message += `Размер: ${states[chatId].size}\n`;
     }
 
