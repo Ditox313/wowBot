@@ -90,18 +90,22 @@ function handleStart(msg) {
                 }
             });
             console.log('Нажата кнопка заказать');
+            states[chatId].state = 'select_service';
             break;
 
         case kb.home.consulting:
             console.log('Нажата кнопка консультация');
+            states[chatId].state = 'consulting';
             break;
 
         case kb.home.repair:
             console.log('Нажата кнопка ремонт');
+            states[chatId].state = 'repair';
             break;
 
         case kb.home.agreement:
             console.log('Нажата кнопка Согласование');
+            states[chatId].state = 'agreement';
             break;
 
         case kb.back:
@@ -111,9 +115,18 @@ function handleStart(msg) {
                 }
             });
             console.log('Нажата кнопка назад');
+            states[chatId].state = 'start';
             break;
 
         case kb.buy.viveska_fasad:
+        case kb.buy.viveska_interier:
+        case kb.buy.viveska_neon:
+        case kb.buy.tabl:
+        case kb.buy.banner:
+        case kb.buy.stella:
+        case kb.buy.vizitki:
+        case kb.buy.list:
+        case kb.buy.art:
             bot.sendMessage(chatId, `Есть ли у вас макет?`, {
                 reply_markup: {
                     keyboard: [[kb.back]]
@@ -121,6 +134,7 @@ function handleStart(msg) {
             });
             console.log('Нажата кнопка фассадная вывеска');
             states[chatId].state = 'ask_layout';
+            states[chatId].selectedService = msg.text;
             break;
     }
 }
@@ -210,15 +224,19 @@ function handleCollectData(msg) {
         });
         states[chatId].state = 'ask_size';
     } else if (states[chatId].nextQuestion === 'forward_to_operator') {
-        forwardToOperator(chatId);
+        forwardToOperator(chatId, msg.from);
     }
 }
 
 // Переадресация данных оператору
-function forwardToOperator(chatId) {
+function forwardToOperator(chatId, user) {
     const operatorChatId = 1460472617; // Ваш chat ID
+    const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
 
-    let message = `Новый заказ:\n`;
+    let message = `Новая заявка:\n`;
+    if (states[chatId].selectedService) {
+        message += `Услуга: ${states[chatId].selectedService}\n`;
+    }
     if (states[chatId].hasLayout !== undefined) {
         message += `Макет: ${states[chatId].hasLayout ? 'Есть' : 'Нет'}\n`;
     }
@@ -231,11 +249,22 @@ function forwardToOperator(chatId) {
         message += `Размер: ${states[chatId].size}\n`;
     }
 
+    // Добавляем ссылку на личный чат с клиентом
+    if (user.username) {
+        message += `Ссылка на чат с клиентом: https://t.me/${user.username}\n`;
+    } else {
+        message += `Клиент не имеет username. ID клиента: ${user.id}\n`;
+    }
+
     bot.sendMessage(operatorChatId, message);
-    bot.sendMessage(chatId, `Ваш заказ передан оператору. Ожидайте связи.`, {
+
+    // Формируем ссылку для клиента, чтобы он мог написать оператору
+    const operatorLink = operatorUsername ? `https://t.me/${operatorUsername}` : `tg://resolve?chat_id=${operatorChatId}`;
+    bot.sendMessage(chatId, `Ваш заказ передан оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
         reply_markup: {
             keyboard: [[kb.back]]
-        }
+        },
+        parse_mode: 'Markdown'
     });
 
     // Очищаем состояние
