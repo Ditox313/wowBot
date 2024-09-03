@@ -103,7 +103,7 @@ function handleStart(msg) {
 
         case kb.home.consulting:
             console.log('Нажата кнопка консультация');
-            states[chatId].state = 'consulting';
+            forwardToOperator(chatId, msg.from, 'Консультация');
             break;
 
         case kb.home.repair:
@@ -205,7 +205,7 @@ function handleAskSize(msg) {
         states[chatId].nextQuestion = 'forward_to_operator';
     } else if (msg.text.toLowerCase() === 'нет' || msg.text.toLowerCase() === 'не знаю') {
         states[chatId].size = 'Нет';
-        forwardToOperator(chatId, msg.from);
+        forwardToOperator(chatId, msg.from, 'Услуга', states[chatId].selectedService, states[chatId].hasLayout, states[chatId].layout, states[chatId].size);
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас макет?`, {
             reply_markup: {
@@ -245,29 +245,29 @@ function handleCollectData(msg) {
         });
         states[chatId].state = 'ask_size';
     } else if (states[chatId].nextQuestion === 'forward_to_operator') {
-        forwardToOperator(chatId, msg.from);
+        forwardToOperator(chatId, msg.from, 'Услуга', states[chatId].selectedService, states[chatId].hasLayout, states[chatId].layout, states[chatId].size);
     }
 }
 
 // Переадресация данных оператору
-function forwardToOperator(chatId, user) {
+function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size) {
     const operatorChatId = 1460472617; // Ваш chat ID
     const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
 
-    let message = `Новая заявка:\n`;
-    if (states[chatId].selectedService) {
-        message += `Услуга: ${states[chatId].selectedService}\n`;
+    let message = `Новая заявка: ${requestType}\n`;
+    if (selectedService) {
+        message += `Услуга: ${selectedService}\n`;
     }
-    if (states[chatId].hasLayout !== undefined) {
-        message += `Макет: ${states[chatId].hasLayout ? 'Есть' : 'Нет'}\n`;
+    if (hasLayout !== undefined) {
+        message += `Макет: ${hasLayout ? 'Есть' : 'Нет'}\n`;
     }
-    if (states[chatId].layout) {
-        bot.sendPhoto(operatorChatId, states[chatId].layout, {
+    if (layout) {
+        bot.sendPhoto(operatorChatId, layout, {
             caption: 'Макет'
         });
     }
-    if (states[chatId].size !== undefined) {
-        message += `Размер: ${states[chatId].size}\n`;
+    if (size !== undefined) {
+        message += `Размер: ${size}\n`;
     }
 
     // Добавляем ссылку на личный чат с клиентом
@@ -281,7 +281,7 @@ function forwardToOperator(chatId, user) {
 
     // Формируем ссылку для клиента, чтобы он мог написать оператору
     const operatorLink = operatorUsername ? `https://t.me/${operatorUsername}` : `tg://resolve?chat_id=${operatorChatId}`;
-    bot.sendMessage(chatId, `Ваш заказ передан оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
+    bot.sendMessage(chatId, `Ваша заявка передана оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
         reply_markup: {
             keyboard: [[kb.back]],
             resize_keyboard: true
