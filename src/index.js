@@ -89,6 +89,18 @@ bot.on('message', (msg) => {
         case 'collect_photo':
             handleCollectPhoto(msg);
             break;
+        case 'ask_agreement_address':
+            handleAskAgreementAddress(msg);
+            break;
+        case 'ask_agreement_photo':
+            handleAskAgreementPhoto(msg);
+            break;
+        case 'collect_agreement_photo':
+            handleCollectAgreementPhoto(msg);
+            break;
+        case 'ask_agreement_text':
+            handleAskAgreementText(msg);
+            break;
         default:
             handleStart(msg);
     }
@@ -128,7 +140,13 @@ function handleStart(msg) {
 
         case kb.home.agreement:
             console.log('Нажата кнопка Согласование');
-            states[chatId].state = 'agreement';
+            bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования.`, {
+                reply_markup: {
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
+                }
+            });
+            states[chatId].state = 'ask_agreement_address';
             break;
 
         case kb.back:
@@ -333,7 +351,7 @@ function handleCollectPhoto(msg) {
 
     if (msg.photo) {
         states[chatId].photo = msg.photo[msg.photo.length - 1].file_id;
-        forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, states[chatId].photo, null, states[chatId].address, true);
+        forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, states[chatId].photo, null, states[chatId].address, null);
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас фото изделия?`, {
             reply_markup: {
@@ -352,8 +370,133 @@ function handleCollectPhoto(msg) {
     }
 }
 
+// Обработка адреса для согласования
+function handleAskAgreementAddress(msg) {
+    const chatId = helper.getChatId(msg);
+
+    if (msg.text) {
+        states[chatId].address = msg.text;
+        bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_photo';
+    } else if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Выберите услугу которая вас интересует:`, {
+            reply_markup: {
+                keyboard: kb_text.home[0],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'start';
+    } else {
+        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+    }
+}
+
+// Обработка фото фасада для согласования
+function handleAskAgreementPhoto(msg) {
+    const chatId = helper.getChatId(msg);
+
+    if (msg.text && (msg.text.toLowerCase() === 'да' || msg.text.toLowerCase() === 'есть')) {
+        bot.sendMessage(chatId, `Пожалуйста, пришлите фото фасада.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'collect_agreement_photo';
+    } else if (msg.text && (msg.text.toLowerCase() === 'нет' || msg.text.toLowerCase() === 'нет')) {
+        bot.sendMessage(chatId, `Пожалуйста, укажите текст вывески.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_text';
+    } else if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_address';
+    } else {
+        bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+    }
+}
+
+// Сбор фото фасада для согласования
+function handleCollectAgreementPhoto(msg) {
+    const chatId = helper.getChatId(msg);
+
+    if (msg.photo) {
+        states[chatId].photo = msg.photo[msg.photo.length - 1].file_id;
+        bot.sendMessage(chatId, `Пожалуйста, укажите текст вывески.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_text';
+    } else if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_photo';
+    } else {
+        bot.sendMessage(chatId, `Пожалуйста, пришлите фото фасада.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+    }
+}
+
+// Обработка текста вывески для согласования
+function handleAskAgreementText(msg) {
+    const chatId = helper.getChatId(msg);
+
+    if (msg.text) {
+        states[chatId].text = msg.text;
+        forwardToOperator(chatId, msg.from, 'Согласование', null, null, states[chatId].photo, null, states[chatId].address, states[chatId].text);
+    } else if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_photo';
+    } else {
+        bot.sendMessage(chatId, `Пожалуйста, укажите текст вывески.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+    }
+}
+
 // Переадресация данных оператору
-function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size, address, photo) {
+function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size, address, text) {
     const operatorChatId = 1460472617; // Ваш chat ID
     const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
 
@@ -362,37 +505,42 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
         message += `Услуга: ${selectedService}\n`;
     }
     if (hasLayout !== undefined) {
-        if(requestType !== 'Ремонт/Обслуживание')
+        if(requestType !== 'Ремонт/Обслуживание' && requestType !== 'Согласование')
         {
             message += `Макет: ${hasLayout ? 'Есть' : 'Нет'}\n`;
         }
-        
-        
     }
     if (layout) {
         bot.sendPhoto(operatorChatId, layout, {
-            caption: requestType === 'Ремонт/Обслуживание' ? 'Фото изделия' : 'Макет'
+            caption: requestType === 'Ремонт/Обслуживание' ? 'Фото изделия' : requestType === 'Согласование' ? 'Фото фасада' : 'Макет'
         });
     }
     if (size !== undefined) {
-        if(requestType !== 'Ремонт/Обслуживание')
+        if(requestType !== 'Ремонт/Обслуживание' && requestType !== 'Согласование')
         {
             message += `Размер: ${size}\n`;
         }
-        
     }
     if (address) {
         message += `Адрес: ${address}\n`;
     }
-
-    if (photo && requestType === 'Ремонт/Обслуживание') {
-        message += `Фото изделия: Есть\n`;
+    if (requestType === 'Ремонт/Обслуживание') {
+        if (layout) {
+            message += `Фото изделия: Есть\n`;
+        } else {
+            message += `Фото изделия: Нет\n`;
+        }
     }
-    if (!photo && requestType === 'Ремонт/Обслуживание') {
-        message += `Фото изделия: Нет\n`;
+    if (requestType === 'Согласование') {
+        if (layout) {
+            message += `Фото фасада: Есть\n`;
+        } else {
+            message += `Фото фасада: Нет\n`;
+        }
+        if (text) {
+            message += `Текст вывески: ${text}\n`;
+        }
     }
-    
-    
 
     // Добавляем ссылку на личный чат с клиентом
     if (user.username) {
@@ -405,7 +553,7 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
 
     // Формируем ссылку для клиента, чтобы он мог написать оператору
     const operatorLink = operatorUsername ? `https://t.me/${operatorUsername}` : `tg://resolve?chat_id=${operatorChatId}`;
-    bot.sendMessage(chatId, `Ваш заказ передан оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
+    bot.sendMessage(chatId, `Заявка передана оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
         reply_markup: {
             keyboard: [[kb.back]],
             resize_keyboard: true
