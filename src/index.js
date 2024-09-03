@@ -51,7 +51,8 @@ bot.onText(/\/start/, async (msg) => {
     // Отправка приветственного сообщения
     bot.sendMessage(helper.getChatId(msg), `Привет, ${firstName}! Добро пожаловать в наш бот. Выберите услугу которая вас интересует`, {
         reply_markup: {
-            keyboard: kb_text.home[0]
+            keyboard: kb_text.home[0],
+            resize_keyboard: true
         }
     });
 });
@@ -92,7 +93,8 @@ function handleStart(msg) {
         case kb.home.buy:
             bot.sendMessage(chatId, `Выберите что хотите заказать:`, {
                 reply_markup: {
-                    keyboard: kb_text.buy[0].concat([[kb.back]])
+                    keyboard: kb_text.buy[0].concat([[kb.back]]),
+                    resize_keyboard: true
                 }
             });
             console.log('Нажата кнопка заказать');
@@ -117,7 +119,8 @@ function handleStart(msg) {
         case kb.back:
             bot.sendMessage(chatId, `Выберите услугу которая вас интересует:`, {
                 reply_markup: {
-                    keyboard: kb_text.home[0]
+                    keyboard: kb_text.home[0],
+                    resize_keyboard: true
                 }
             });
             console.log('Нажата кнопка назад');
@@ -135,7 +138,8 @@ function handleStart(msg) {
         case kb.buy.art:
             bot.sendMessage(chatId, `Есть ли у вас макет?`, {
                 reply_markup: {
-                    keyboard: [[kb.back]]
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
                 }
             });
             console.log('Нажата кнопка фассадная вывеска');
@@ -152,7 +156,8 @@ function handleAskLayout(msg) {
     if (msg.text.toLowerCase() === 'да') {
         bot.sendMessage(chatId, `Пожалуйста, пришлите ваш макет.`, {
             reply_markup: {
-                keyboard: [[kb.back]]
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
         states[chatId].state = 'collect_data';
@@ -161,7 +166,8 @@ function handleAskLayout(msg) {
     } else if (msg.text.toLowerCase() === 'нет') {
         bot.sendMessage(chatId, `Знаете ли вы размер?`, {
             reply_markup: {
-                keyboard: [[kb.back]]
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
         states[chatId].state = 'ask_size';
@@ -169,14 +175,16 @@ function handleAskLayout(msg) {
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Выберите услугу которая вас интересует:`, {
             reply_markup: {
-                keyboard: kb_text.home[0]
+                keyboard: kb_text.home[0],
+                resize_keyboard: true
             }
         });
         states[chatId].state = 'start';
     } else {
         bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
             reply_markup: {
-                keyboard: [[kb.back]]
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
     }
@@ -189,7 +197,8 @@ function handleAskSize(msg) {
     if (msg.text.toLowerCase() === 'да' || msg.text.toLowerCase() === 'знаю') {
         bot.sendMessage(chatId, `Пожалуйста, укажите размер.`, {
             reply_markup: {
-                keyboard: [[kb.back]]
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
         states[chatId].state = 'collect_data';
@@ -200,14 +209,16 @@ function handleAskSize(msg) {
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас макет?`, {
             reply_markup: {
-                keyboard: [[kb.back]]
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
         states[chatId].state = 'ask_layout';
     } else {
         bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
             reply_markup: {
-                keyboard: [[kb.back]]
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
     }
@@ -228,7 +239,8 @@ function handleCollectData(msg) {
     if (states[chatId].nextQuestion === 'ask_size') {
         bot.sendMessage(chatId, `Знаете ли вы размер?`, {
             reply_markup: {
-                keyboard: [[kb.back]]
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
         states[chatId].state = 'ask_size';
@@ -271,7 +283,8 @@ function forwardToOperator(chatId, user) {
     const operatorLink = operatorUsername ? `https://t.me/${operatorUsername}` : `tg://resolve?chat_id=${operatorChatId}`;
     bot.sendMessage(chatId, `Ваш заказ передан оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
         reply_markup: {
-            keyboard: [[kb.back]]
+            keyboard: [[kb.back]],
+            resize_keyboard: true
         },
         parse_mode: 'Markdown'
     });
