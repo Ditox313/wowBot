@@ -80,6 +80,15 @@ bot.on('message', (msg) => {
         case 'collect_data':
             handleCollectData(msg);
             break;
+        case 'ask_address':
+            handleAskAddress(msg);
+            break;
+        case 'ask_photo':
+            handleAskPhoto(msg);
+            break;
+        case 'collect_photo':
+            handleCollectPhoto(msg);
+            break;
         default:
             handleStart(msg);
     }
@@ -108,7 +117,13 @@ function handleStart(msg) {
 
         case kb.home.repair:
             console.log('Нажата кнопка ремонт');
-            states[chatId].state = 'repair';
+            bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания.`, {
+                reply_markup: {
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
+                }
+            });
+            states[chatId].state = 'ask_address';
             break;
 
         case kb.home.agreement:
@@ -249,8 +264,96 @@ function handleCollectData(msg) {
     }
 }
 
+// Обработка вопроса об адресе
+function handleAskAddress(msg) {
+    const chatId = helper.getChatId(msg);
+
+    if (msg.text) {
+        states[chatId].address = msg.text;
+        bot.sendMessage(chatId, `Есть ли у вас фото изделия?`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_photo';
+    } else if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Выберите услугу которая вас интересует:`, {
+            reply_markup: {
+                keyboard: kb_text.home[0],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'start';
+    } else {
+        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+    }
+}
+
+// Обработка вопроса о наличии фото
+function handleAskPhoto(msg) {
+    const chatId = helper.getChatId(msg);
+
+    if (msg.text && (msg.text.toLowerCase() === 'да' || msg.text.toLowerCase() === 'есть')) {
+        bot.sendMessage(chatId, `Пожалуйста, пришлите фото изделия.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'collect_photo';
+    } else if (msg.text && (msg.text.toLowerCase() === 'нет' || msg.text.toLowerCase() === 'нет')) {
+        forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, null, null, states[chatId].address, null);
+    } else if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_address';
+    } else {
+        bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+    }
+}
+
+// Сбор фото от пользователя
+function handleCollectPhoto(msg) {
+    const chatId = helper.getChatId(msg);
+
+    if (msg.photo) {
+        states[chatId].photo = msg.photo[msg.photo.length - 1].file_id;
+        forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, states[chatId].photo, null, states[chatId].address, true);
+    } else if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Есть ли у вас фото изделия?`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_photo';
+    } else {
+        bot.sendMessage(chatId, `Пожалуйста, пришлите фото изделия.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+    }
+}
+
 // Переадресация данных оператору
-function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size) {
+function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size, address, photo) {
     const operatorChatId = 1460472617; // Ваш chat ID
     const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
 
@@ -259,16 +362,37 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
         message += `Услуга: ${selectedService}\n`;
     }
     if (hasLayout !== undefined) {
-        message += `Макет: ${hasLayout ? 'Есть' : 'Нет'}\n`;
+        if(requestType !== 'Ремонт/Обслуживание')
+        {
+            message += `Макет: ${hasLayout ? 'Есть' : 'Нет'}\n`;
+        }
+        
+        
     }
     if (layout) {
         bot.sendPhoto(operatorChatId, layout, {
-            caption: 'Макет'
+            caption: requestType === 'Ремонт/Обслуживание' ? 'Фото изделия' : 'Макет'
         });
     }
     if (size !== undefined) {
-        message += `Размер: ${size}\n`;
+        if(requestType !== 'Ремонт/Обслуживание')
+        {
+            message += `Размер: ${size}\n`;
+        }
+        
     }
+    if (address) {
+        message += `Адрес: ${address}\n`;
+    }
+
+    if (photo && requestType === 'Ремонт/Обслуживание') {
+        message += `Фото изделия: Есть\n`;
+    }
+    if (!photo && requestType === 'Ремонт/Обслуживание') {
+        message += `Фото изделия: Нет\n`;
+    }
+    
+    
 
     // Добавляем ссылку на личный чат с клиентом
     if (user.username) {
@@ -281,7 +405,7 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
 
     // Формируем ссылку для клиента, чтобы он мог написать оператору
     const operatorLink = operatorUsername ? `https://t.me/${operatorUsername}` : `tg://resolve?chat_id=${operatorChatId}`;
-    bot.sendMessage(chatId, `Ваша заявка передана оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
+    bot.sendMessage(chatId, `Ваш заказ передан оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
         reply_markup: {
             keyboard: [[kb.back]],
             resize_keyboard: true
