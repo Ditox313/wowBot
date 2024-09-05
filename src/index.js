@@ -106,6 +106,19 @@ bot.on('message', (msg) => {
     }
 });
 
+// Обработка инлайн-кнопок
+bot.on('callback_query', (callbackQuery) => {
+    const msg = callbackQuery.message;
+    const data = callbackQuery.data;
+    const chatId = msg.chat.id;
+
+    if (data === 'yes') {
+        handleYes(msg);
+    } else if (data === 'no') {
+        handleNo(msg);
+    }
+});
+
 // Обработка начального состояния
 function handleStart(msg) {
     const chatId = helper.getChatId(msg);
@@ -171,8 +184,10 @@ function handleStart(msg) {
         case kb.buy.art:
             bot.sendMessage(chatId, `Есть ли у вас макет?`, {
                 reply_markup: {
-                    keyboard: [[kb.back]],
-                    resize_keyboard: true
+                    inline_keyboard: [
+                        [{ text: 'Да', callback_data: 'yes' }],
+                        [{ text: 'Нет', callback_data: 'no' }]
+                    ]
                 }
             });
             console.log('Нажата кнопка фассадная вывеска');
@@ -199,8 +214,10 @@ function handleAskLayout(msg) {
     } else if (msg.text.toLowerCase() === 'нет') {
         bot.sendMessage(chatId, `Знаете ли вы размер?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_size';
@@ -216,8 +233,10 @@ function handleAskLayout(msg) {
     } else {
         bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
     }
@@ -242,16 +261,20 @@ function handleAskSize(msg) {
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас макет?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_layout';
     } else {
         bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
     }
@@ -272,8 +295,10 @@ function handleCollectData(msg) {
     if (states[chatId].nextQuestion === 'ask_size') {
         bot.sendMessage(chatId, `Знаете ли вы размер?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_size';
@@ -290,8 +315,10 @@ function handleAskAddress(msg) {
         states[chatId].address = msg.text;
         bot.sendMessage(chatId, `Есть ли у вас фото изделия?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_photo';
@@ -338,8 +365,10 @@ function handleAskPhoto(msg) {
     } else {
         bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
     }
@@ -355,8 +384,10 @@ function handleCollectPhoto(msg) {
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас фото изделия?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_photo';
@@ -378,8 +409,10 @@ function handleAskAgreementAddress(msg) {
         states[chatId].address = msg.text;
         bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_agreement_photo';
@@ -432,8 +465,10 @@ function handleAskAgreementPhoto(msg) {
     } else {
         bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
     }
@@ -455,8 +490,10 @@ function handleCollectAgreementPhoto(msg) {
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_agreement_photo';
@@ -480,8 +517,10 @@ function handleAskAgreementText(msg) {
     } else if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
             reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
+                inline_keyboard: [
+                    [{ text: 'Да', callback_data: 'yes' }],
+                    [{ text: 'Нет', callback_data: 'no' }]
+                ]
             }
         });
         states[chatId].state = 'ask_agreement_photo';
@@ -497,8 +536,11 @@ function handleAskAgreementText(msg) {
 
 // Переадресация данных оператору
 function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size, address, text) {
-    const operatorChatId = 1460472617; // Ваш chat ID
-    const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
+    const operatorChatId = 6735417682; // Ваш chat ID
+    const operatorUsername = 'Stir1710'; // Замените на username оператора
+
+    //const operatorChatId = 1460472617; // Ваш chat ID
+   // const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
 
     let message = `Новая заявка: ${requestType}\n`;
     if (selectedService) {
@@ -563,4 +605,91 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
 
     // Очищаем состояние
     delete states[chatId];
+}
+
+// Обработка ответа "Да"
+function handleYes(msg) {
+    const chatId = msg.chat.id;
+
+    switch (states[chatId].state) {
+        case 'ask_layout':
+            bot.sendMessage(chatId, `Пожалуйста, пришлите ваш макет.`, {
+                reply_markup: {
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
+                }
+            });
+            states[chatId].state = 'collect_data';
+            states[chatId].nextQuestion = 'ask_size';
+            states[chatId].hasLayout = true;
+            break;
+        case 'ask_size':
+            bot.sendMessage(chatId, `Пожалуйста, укажите размер.`, {
+                reply_markup: {
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
+                }
+            });
+            states[chatId].state = 'collect_data';
+            states[chatId].nextQuestion = 'forward_to_operator';
+            break;
+        case 'ask_photo':
+            bot.sendMessage(chatId, `Пожалуйста, пришлите фото изделия.`, {
+                reply_markup: {
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
+                }
+            });
+            states[chatId].state = 'collect_photo';
+            break;
+        case 'ask_agreement_photo':
+            bot.sendMessage(chatId, `Пожалуйста, пришлите фото фасада.`, {
+                reply_markup: {
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
+                }
+            });
+            states[chatId].state = 'collect_agreement_photo';
+            break;
+        default:
+            break;
+    }
+}
+
+// Обработка ответа "Нет"
+function handleNo(msg) {
+    const chatId = msg.chat.id;
+
+    switch (states[chatId].state) {
+        case 'ask_layout':
+            bot.sendMessage(chatId, `Знаете ли вы размер?`, {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: 'Да', callback_data: 'yes' }],
+                        [{ text: 'Нет', callback_data: 'no' }]
+                    ]
+                }
+            });
+            states[chatId].state = 'ask_size';
+            states[chatId].hasLayout = false;
+            break;
+        case 'ask_size':
+            states[chatId].size = 'Нет';
+            forwardToOperator(chatId, msg.from, 'Услуга', states[chatId].selectedService, states[chatId].hasLayout, states[chatId].layout, states[chatId].size);
+            break;
+        case 'ask_photo':
+            forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, null, null, states[chatId].address, null);
+            break;
+        case 'ask_agreement_photo':
+            bot.sendMessage(chatId, `Пожалуйста, укажите текст вывески.`, {
+                reply_markup: {
+                    keyboard: [[kb.back]],
+                    resize_keyboard: true
+                }
+            });
+            states[chatId].state = 'ask_agreement_text';
+            break;
+        default:
+            break;
+    }
 }
