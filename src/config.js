@@ -1,4 +1,0 @@
-module.exports = {
-    TOKEN: 'REDACTED',
-    DB_URL: 'mongodb://localhost/wowbot',
-}

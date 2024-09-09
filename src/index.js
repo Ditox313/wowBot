@@ -1,13 +1,13 @@
 const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
-const config = require('./config');
 const helper = require('./helper');
 const kb = require('./keyboard_buttons');
 const kb_text = require('./keyboard_text.js');
 const User = require('./models/User.js');
+require('dotenv').config();
 
 // Подключаемся к MongoDB
-mongoose.connect(config.DB_URL)
+mongoose.connect(process.env.DB_URL)
     .then(() => {
         console.log('Мы подключились к БД бота!!!');
     })
@@ -16,7 +16,7 @@ mongoose.connect(config.DB_URL)
     });
 
 // Создаем экземпляр бота
-const bot = new TelegramBot(config.TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 helper.logStart();
 
 // Состояния диалога
