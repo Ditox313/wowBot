@@ -311,7 +311,15 @@ function handleCollectData(msg) {
 function handleAskAddress(msg) {
     const chatId = helper.getChatId(msg);
 
-    if (msg.text) {
+    if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Выберите услугу, которая вас интересует:`, {
+            reply_markup: {
+                keyboard: kb_text.home[0],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'start';
+    } else if (msg.text) {
         states[chatId].address = msg.text;
         bot.sendMessage(chatId, `Есть ли у вас фото изделия?`, {
             reply_markup: {
@@ -322,16 +330,8 @@ function handleAskAddress(msg) {
             }
         });
         states[chatId].state = 'ask_photo';
-    } else if (msg.text === kb.back) {
-        bot.sendMessage(chatId, `Выберите услугу которая вас интересует:`, {
-            reply_markup: {
-                keyboard: kb_text.home[0],
-                resize_keyboard: true
-            }
-        });
-        states[chatId].state = 'start';
     } else {
-        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания.`, {
+        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания или нажмите кнопку "Назад".`, {
             reply_markup: {
                 keyboard: [[kb.back]],
                 resize_keyboard: true
@@ -340,12 +340,21 @@ function handleAskAddress(msg) {
     }
 }
 
+
 // Обработка вопроса о наличии фото
 function handleAskPhoto(msg) {
     const chatId = helper.getChatId(msg);
 
-    if (msg.text && (msg.text.toLowerCase() === 'да' || msg.text.toLowerCase() === 'есть')) {
-        bot.sendMessage(chatId, `Пожалуйста, пришлите фото изделия.`, {
+    if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания или нажмите кнопку "Назад".`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_address';
+    } else if (msg.text && (msg.text.toLowerCase() === 'да' || msg.text.toLowerCase() === 'есть')) {
+        bot.sendMessage(chatId, `Пожалуйста, пришлите фото изделия или нажмите кнопку "Назад".`, {
             reply_markup: {
                 keyboard: [[kb.back]],
                 resize_keyboard: true
@@ -354,21 +363,15 @@ function handleAskPhoto(msg) {
         states[chatId].state = 'collect_photo';
     } else if (msg.text && (msg.text.toLowerCase() === 'нет' || msg.text.toLowerCase() === 'нет')) {
         forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, null, null, states[chatId].address, null);
-    } else if (msg.text === kb.back) {
-        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания.`, {
-            reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
-            }
-        });
-        states[chatId].state = 'ask_address';
     } else {
-        bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
+        bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет", или нажмите кнопку "Назад".`, {
             reply_markup: {
                 inline_keyboard: [
                     [{ text: 'Да', callback_data: 'yes' }],
                     [{ text: 'Нет', callback_data: 'no' }]
-                ]
+                ],
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
     }
@@ -378,21 +381,23 @@ function handleAskPhoto(msg) {
 function handleCollectPhoto(msg) {
     const chatId = helper.getChatId(msg);
 
-    if (msg.photo) {
-        states[chatId].photo = msg.photo[msg.photo.length - 1].file_id;
-        forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, states[chatId].photo, null, states[chatId].address, null);
-    } else if (msg.text === kb.back) {
+    if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас фото изделия?`, {
             reply_markup: {
                 inline_keyboard: [
                     [{ text: 'Да', callback_data: 'yes' }],
                     [{ text: 'Нет', callback_data: 'no' }]
-                ]
+                ],
+                keyboard: [[kb.back]],
+                resize_keyboard: true
             }
         });
         states[chatId].state = 'ask_photo';
+    } else if (msg.photo) {
+        states[chatId].photo = msg.photo[msg.photo.length - 1].file_id;
+        forwardToOperator(chatId, msg.from, 'Ремонт/Обслуживание', null, null, states[chatId].photo, null, states[chatId].address, null);
     } else {
-        bot.sendMessage(chatId, `Пожалуйста, пришлите фото изделия.`, {
+        bot.sendMessage(chatId, `Пожалуйста, пришлите фото изделия или нажмите кнопку "Назад".`, {
             reply_markup: {
                 keyboard: [[kb.back]],
                 resize_keyboard: true
@@ -405,7 +410,15 @@ function handleCollectPhoto(msg) {
 function handleAskAgreementAddress(msg) {
     const chatId = helper.getChatId(msg);
 
-    if (msg.text) {
+    if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Выберите услугу, которая вас интересует:`, {
+            reply_markup: {
+                keyboard: kb_text.home[0],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'start';
+    } else if (msg.text) {
         states[chatId].address = msg.text;
         bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
             reply_markup: {
@@ -416,14 +429,6 @@ function handleAskAgreementAddress(msg) {
             }
         });
         states[chatId].state = 'ask_agreement_photo';
-    } else if (msg.text === kb.back) {
-        bot.sendMessage(chatId, `Выберите услугу которая вас интересует:`, {
-            reply_markup: {
-                keyboard: kb_text.home[0],
-                resize_keyboard: true
-            }
-        });
-        states[chatId].state = 'start';
     } else {
         bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования.`, {
             reply_markup: {
@@ -438,7 +443,15 @@ function handleAskAgreementAddress(msg) {
 function handleAskAgreementPhoto(msg) {
     const chatId = helper.getChatId(msg);
 
-    if (msg.text && (msg.text.toLowerCase() === 'да' || msg.text.toLowerCase() === 'есть')) {
+    if (msg.text === kb.back) {
+        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_address';
+    } else if (msg.text && (msg.text.toLowerCase() === 'да' || msg.text.toLowerCase() === 'есть')) {
         bot.sendMessage(chatId, `Пожалуйста, пришлите фото фасада.`, {
             reply_markup: {
                 keyboard: [[kb.back]],
@@ -454,14 +467,6 @@ function handleAskAgreementPhoto(msg) {
             }
         });
         states[chatId].state = 'ask_agreement_text';
-    } else if (msg.text === kb.back) {
-        bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования.`, {
-            reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
-            }
-        });
-        states[chatId].state = 'ask_agreement_address';
     } else {
         bot.sendMessage(chatId, `Пожалуйста, ответьте "да" или "нет".`, {
             reply_markup: {
@@ -478,16 +483,7 @@ function handleAskAgreementPhoto(msg) {
 function handleCollectAgreementPhoto(msg) {
     const chatId = helper.getChatId(msg);
 
-    if (msg.photo) {
-        states[chatId].photo = msg.photo[msg.photo.length - 1].file_id;
-        bot.sendMessage(chatId, `Пожалуйста, укажите текст вывески.`, {
-            reply_markup: {
-                keyboard: [[kb.back]],
-                resize_keyboard: true
-            }
-        });
-        states[chatId].state = 'ask_agreement_text';
-    } else if (msg.text === kb.back) {
+    if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
             reply_markup: {
                 inline_keyboard: [
@@ -497,6 +493,15 @@ function handleCollectAgreementPhoto(msg) {
             }
         });
         states[chatId].state = 'ask_agreement_photo';
+    } else if (msg.photo) {
+        states[chatId].photo = msg.photo[msg.photo.length - 1].file_id;
+        bot.sendMessage(chatId, `Пожалуйста, укажите текст вывески.`, {
+            reply_markup: {
+                keyboard: [[kb.back]],
+                resize_keyboard: true
+            }
+        });
+        states[chatId].state = 'ask_agreement_text';
     } else {
         bot.sendMessage(chatId, `Пожалуйста, пришлите фото фасада.`, {
             reply_markup: {
@@ -511,10 +516,7 @@ function handleCollectAgreementPhoto(msg) {
 function handleAskAgreementText(msg) {
     const chatId = helper.getChatId(msg);
 
-    if (msg.text) {
-        states[chatId].text = msg.text;
-        forwardToOperator(chatId, msg.from, 'Согласование', null, null, states[chatId].photo, null, states[chatId].address, states[chatId].text);
-    } else if (msg.text === kb.back) {
+    if (msg.text === kb.back) {
         bot.sendMessage(chatId, `Есть ли у вас фото фасада?`, {
             reply_markup: {
                 inline_keyboard: [
@@ -524,6 +526,9 @@ function handleAskAgreementText(msg) {
             }
         });
         states[chatId].state = 'ask_agreement_photo';
+    } else if (msg.text) {
+        states[chatId].text = msg.text;
+        forwardToOperator(chatId, msg.from, 'Согласование', null, null, states[chatId].photo, null, states[chatId].address, states[chatId].text);
     } else {
         bot.sendMessage(chatId, `Пожалуйста, укажите текст вывески.`, {
             reply_markup: {
