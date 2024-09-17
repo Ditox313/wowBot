@@ -49,7 +49,7 @@ bot.onText(/\/start/, async (msg) => {
     }
 
     // Отправка приветственного сообщения
-    bot.sendMessage(helper.getChatId(msg), `Привет, ${firstName}! Добро пожаловать в наш бот. Выберите услугу которая вас интересует`, {
+    bot.sendMessage(helper.getChatId(msg), `Привет, ${firstName}! Добро пожаловать в наш бот! Выберите услугу, которая вас интересует:`, {
         reply_markup: {
             keyboard: kb_text.home[0],
             resize_keyboard: true
@@ -142,7 +142,7 @@ function handleStart(msg) {
 
         case kb.home.repair:
             console.log('Нажата кнопка ремонт');
-            bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания.`, {
+            bot.sendMessage(chatId, `Пожалуйста, укажите адрес для ремонта/обслуживания (город, улица, дом):`, {
                 reply_markup: {
                     keyboard: [[kb.back]],
                     resize_keyboard: true
@@ -153,7 +153,7 @@ function handleStart(msg) {
 
         case kb.home.agreement:
             console.log('Нажата кнопка Согласование');
-            bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования.`, {
+            bot.sendMessage(chatId, `Пожалуйста, укажите адрес для согласования (город, улица, дом):`, {
                 reply_markup: {
                     keyboard: [[kb.back]],
                     resize_keyboard: true
@@ -190,7 +190,7 @@ function handleStart(msg) {
                     ]
                 }
             });
-            console.log('Нажата кнопка фассадная вывеска');
+            console.log('Нажата кнопка фасадная вывеска');
             states[chatId].state = 'ask_layout';
             states[chatId].selectedService = msg.text;
             break;
@@ -536,8 +536,8 @@ function handleAskAgreementText(msg) {
 
 // Переадресация данных оператору
 function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size, address, text) {
-    const operatorChatId = 6735417682; // Ваш chat ID
-    const operatorUsername = 'Stir1710'; // Замените на username оператора
+    const operatorChatId = 1089596961; // Ваш chat ID
+    const operatorUsername = 'ditoxweb'; // Замените на username оператора
 
     //const operatorChatId = 1460472617; // Ваш chat ID
    // const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
@@ -595,7 +595,7 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
 
     // Формируем ссылку для клиента, чтобы он мог написать оператору
     const operatorLink = operatorUsername ? `https://t.me/${operatorUsername}` : `tg://resolve?chat_id=${operatorChatId}`;
-    bot.sendMessage(chatId, `Заявка передана оператору. Ожидайте связи. Вы можете написать оператору напрямую: [Написать оператору](${operatorLink})`, {
+    bot.sendMessage(chatId, `Заявка передана менеджеру. Ожидайте, мы с вами свяжемся в ближайшее время! Или же вы можете написать менеджеру напрямую: [Написать оператору](${operatorLink})`, {
         reply_markup: {
             keyboard: [[kb.back]],
             resize_keyboard: true
