@@ -6,6 +6,10 @@ const kb_text = require('./keyboard_text.js');
 const User = require('./models/User.js');
 require('dotenv').config();
 
+var xs_actual_user = {}
+
+
+
 // Подключаемся к MongoDB
 mongoose.connect(process.env.DB_URL)
     .then(() => {
@@ -19,12 +23,15 @@ mongoose.connect(process.env.DB_URL)
 const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 helper.logStart();
 
+
 // Состояния диалога
 const states = {};
 
 // Обработка команды /start
 bot.onText(/\/start/, async (msg) => {
     const firstName = msg.from.first_name;
+
+    
 
     // Сохраняем пользователя
     const user = {
@@ -60,6 +67,8 @@ bot.onText(/\/start/, async (msg) => {
 // Обработка всех сообщений
 bot.on('message', (msg) => {
     const chatId = helper.getChatId(msg);
+    xs_actual_user = msg
+    
 
     // Инициализация состояния пользователя, если оно еще не существует
     if (!states[chatId]) {
@@ -544,8 +553,8 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
     const operatorChatId = 1089596961; // Ваш chat ID
     const operatorUsername = 'ditoxweb'; // Замените на username оператора
 
-    //const operatorChatId = 1460472617; // Ваш chat ID
-   // const operatorUsername = 'RudyMaxbar'; // Замените на username оператора
+    //const operatorChatId = 6950924946; // Ваш chat ID
+    //const operatorUsername = 'wow_vyveski'; // Замените на username оператора
 
     let message = `Новая заявка: ${requestType}\n`;
     if (selectedService) {
@@ -589,11 +598,11 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
         }
     }
 
-    // Добавляем ссылку на личный чат с клиентом
-    if (user.username) {
-        message += `Ссылка на чат с клиентом: https://t.me/${user.username}\n`;
+    // Добавляем ссылку на личный чат с клиентом из глобальной переменной
+    if (xs_actual_user.from.username) {
+        message += `Ссылка на чат с клиентом: https://t.me/${xs_actual_user.from.username}\n`;
     } else {
-        message += `Клиент не имеет username. ID клиента: ${user.id}\n`;
+        message += `Клиент не имеет username. ID клиента: ${xs_actual_user.from.id}\n`;
     }
 
     bot.sendMessage(operatorChatId, message);
