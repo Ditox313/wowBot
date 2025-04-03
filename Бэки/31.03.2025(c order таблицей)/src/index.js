@@ -5,9 +5,6 @@ const kb = require('./keyboard_buttons');
 const kb_text = require('./keyboard_text.js');
 const User = require('./models/User.js');
 const Order = require('./models/Order.js');
-const Cunsult = require('./models/Consulting.js');
-const Repair = require('./models/Repair.js');
-const Agreement = require('./models/Agreement.js');
 require('dotenv').config();
 const { setupBroadcast, userStates } = require('./admin_function/broadcast.js');
 
@@ -38,7 +35,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/wowbot')
 // Создаем экземпляр бота
 // const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 const bot = new TelegramBot('REDACTED', { polling: true });
-const ADMIN_IDS = [1089596961,481845397]; // ID администраторов
+const ADMIN_IDS = [1089596961]; // ID администраторов
 helper.logStart();
 
 
@@ -605,11 +602,11 @@ function handleAskAgreementText(msg) {
 
 // Переадресация данных оператору
 function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size, address, text) {
-    // const operatorChatId = 1089596961; // Ваш chat ID
-    // const operatorUsername = 'ditoxweb'; // Замените на username оператора
+    const operatorChatId = 1089596961; // Ваш chat ID
+    const operatorUsername = 'ditoxweb'; // Замените на username оператора
 
-    const operatorChatId = 481845397; // Ваш chat ID
-    const operatorUsername = 'antropovayo'; // Замените на username оператора
+    //const operatorChatId = 6950924946; // Ваш chat ID
+    //const operatorUsername = 'wow_vyveski'; // Замените на username оператора
 
     let message = `Новая заявка: ${requestType}\n`;
     if (selectedService) {
@@ -674,78 +671,19 @@ function forwardToOperator(chatId, user, requestType, selectedService, hasLayout
 
     
     // Сохраняем заявку в базу данных
-    if (requestType === 'Услуга')
-    {
-        const newOrder = new Order({
-            tgId: xs_actual_user.from.id,
-            username: xs_actual_user.from.username,
-            createdAt: new Date().toISOString(),
-            type: selectedService || requestType,
-            isMaket: hasLayout !== undefined ? (hasLayout ? 'Есть' : 'Нет') : 'Не указано',
-            size: size || 'Не указан',
-            chatLink: user.username ? `https://t.me/${xs_actual_user.from.username}` : `tg://user?id=${user.id}`
-        });
-    
-        newOrder.save()
-            .then(() => console.log('✅ Заявка сохранена в базу данных.'))
-            .catch((err) => console.error('❌ Ошибка при сохранении заявки:', err));
-    }
+    const newOrder = new Order({
+        tgId: xs_actual_user.from.id,
+        username: xs_actual_user.from.username,
+        createdAt: new Date().toISOString(),
+        type: selectedService || requestType,
+        isMaket: hasLayout !== undefined ? (hasLayout ? 'Есть' : 'Нет') : 'Не указано',
+        size: size || 'Не указан',
+        chatLink: user.username ? `https://t.me/${xs_actual_user.from.username}` : `tg://user?id=${user.id}`
+    });
 
-
-    if (requestType === 'Консультация')
-    {
-        const newOrder = new Cunsult({
-            tgId: xs_actual_user.from.id,
-            username: xs_actual_user.from.username,
-            createdAt: new Date().toISOString(),
-            type: selectedService || requestType,
-            chatLink: user.username ? `https://t.me/${xs_actual_user.from.username}` : `tg://user?id=${user.id}`
-        });
-    
-        newOrder.save()
-            .then(() => console.log('✅ Заявка сохранена в базу данных.'))
-            .catch((err) => console.error('❌ Ошибка при сохранении заявки:', err));
-    }
-
-
-    if (requestType === 'Ремонт/Обслуживание')
-        {
-            const newOrder = new Repair({
-                tgId: xs_actual_user.from.id,
-                username: xs_actual_user.from.username,
-                createdAt: new Date().toISOString(),
-                type: selectedService || requestType,
-                address: address,
-                isPhoto: layout !== undefined ? (layout ? 'Есть' : 'Нет') : 'Не указано',
-                chatLink: user.username ? `https://t.me/${xs_actual_user.from.username}` : `tg://user?id=${user.id}`
-            });
-        
-            newOrder.save()
-                .then(() => console.log('✅ Заявка сохранена в базу данных.'))
-                .catch((err) => console.error('❌ Ошибка при сохранении заявки:', err));
-    }
-
-
-    if (requestType === 'Согласование')
-        {
-            const newOrder = new Agreement({
-                tgId: xs_actual_user.from.id,
-                username: xs_actual_user.from.username,
-                createdAt: new Date().toISOString(),
-                type: selectedService || requestType,
-                address: address,
-                isPhoto: layout !== undefined ? (layout ? 'Есть' : 'Нет') : 'Не указано',
-                textBanner: text,
-                chatLink: user.username ? `https://t.me/${xs_actual_user.from.username}` : `tg://user?id=${user.id}`
-            });
-        
-            newOrder.save()
-                .then(() => console.log('✅ Заявка сохранена в базу данных.'))
-                .catch((err) => console.error('❌ Ошибка при сохранении заявки:', err));
-        }
-
-
-    
+    newOrder.save()
+        .then(() => console.log('✅ Заявка сохранена в базу данных.'))
+        .catch((err) => console.error('❌ Ошибка при сохранении заявки:', err));
 
 
 

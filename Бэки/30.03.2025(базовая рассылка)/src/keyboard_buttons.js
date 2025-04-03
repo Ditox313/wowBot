@@ -4,7 +4,7 @@ module.exports = {
     consulting: 'КОНСУЛЬТАЦИЯ',
     repair: 'РЕМОНТ/ОБСЛУЖИВАНИЕ',
     agreement: 'СОГЛАСОВАНИЕ',
-    broadcast: 'РЕКЛАМНАЯ РАССЫЛКА' 
+    broadcast: 'РЕКЛАМНАЯ РАССЫЛКА' // <-- добавлено
    },
    buy: {
     viveska_fasad: 'Вывеска фасадная',

@@ -5,7 +5,6 @@ module.exports = {
     [
         [kb.home.buy, kb.home.consulting],
         [kb.home.repair, kb.home.agreement],
-        [kb.home.broadcast] // добавлено сюда
     ],
    ],
    buy: [

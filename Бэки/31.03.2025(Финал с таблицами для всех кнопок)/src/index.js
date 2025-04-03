@@ -38,7 +38,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/wowbot')
 // Создаем экземпляр бота
 // const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 const bot = new TelegramBot('REDACTED', { polling: true });
-const ADMIN_IDS = [1089596961,481845397]; // ID администраторов
+const ADMIN_IDS = [1089596961]; // ID администраторов
 helper.logStart();
 
 
@@ -605,11 +605,11 @@ function handleAskAgreementText(msg) {
 
 // Переадресация данных оператору
 function forwardToOperator(chatId, user, requestType, selectedService, hasLayout, layout, size, address, text) {
-    // const operatorChatId = 1089596961; // Ваш chat ID
-    // const operatorUsername = 'ditoxweb'; // Замените на username оператора
+    const operatorChatId = 1089596961; // Ваш chat ID
+    const operatorUsername = 'ditoxweb'; // Замените на username оператора
 
-    const operatorChatId = 481845397; // Ваш chat ID
-    const operatorUsername = 'antropovayo'; // Замените на username оператора
+    //const operatorChatId = 6950924946; // Ваш chat ID
+    //const operatorUsername = 'wow_vyveski'; // Замените на username оператора
 
     let message = `Новая заявка: ${requestType}\n`;
     if (selectedService) {
