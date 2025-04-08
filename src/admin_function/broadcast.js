@@ -1,4 +1,4 @@
-const ADMIN_IDS = [1089596961];
+const ADMIN_IDS = [1089596961,481845397,481845397];
 const userStates = {};
 const kb = require('../keyboard_buttons');
 const kb_text = require('../keyboard_text');

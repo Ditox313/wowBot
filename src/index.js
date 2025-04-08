@@ -38,7 +38,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/wowbot')
 // Создаем экземпляр бота
 // const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 const bot = new TelegramBot('', { polling: true });
-const ADMIN_IDS = [1089596961,481845397]; // ID администраторов
+const ADMIN_IDS = [1089596961,481845397,481845397]; // ID администраторов
 helper.logStart();
 
 
